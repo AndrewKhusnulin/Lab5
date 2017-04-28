@@ -2,230 +2,162 @@
 #include <stdlib.h>
 #include <conio.h>
 using namespace std;
- 
+
 int tabs = 0;
-int number = 0;
-unsigned int k = 0;
-unsigned int n = 0;
+int value = 0;
 
 template <class Type>
 class BinarySearchTree
 {
 private:
-	Type data;
-	BinarySearchTree *left; 
-	BinarySearchTree *right; 
-	BinarySearchTree *parent; 
-	
+	Type value, key;
+	BinarySearchTree *left;
+	BinarySearchTree *right;
+	BinarySearchTree *parent;
+
 public:
-void Add(Type new_data, BinarySearchTree *&root)
-{
-	if (!root)
+    BinarySearchTree(){};
+	void insert(Type key, Type value, BinarySearchTree *&root_up)
 	{
-		root = new BinarySearchTree;
-		root->data = new_data;
-		root->parent = root;
-		root->left = 0;
-		root->right = 0;
-		return;
-	}
-	else if (root->data > new_data) Add(new_data, root->left);
-	else if (root->data < new_data) Add(new_data, root->right); 
-	else return;
-}
-
-void Search(BinarySearchTree *root)
-{
-	if (!root) return;
-	
-	if (k == 0) 
-	{ 
-		cout << endl << "Type the number you want to find: "; 
-		cin >> number;
-	}
-	k++; 
-
-	if(root->data == number) 
-		{ 
-			cout << endl << "[+] The number " << number << " was found!:)";
-			n++;
-		}
-	
-	Search(root->left);
-	Search(root->right);
-
-}
-
-void print_line(BinarySearchTree *root)
-{
-	if (!root) return; 
-	
-	print_line(root->right);
- 
-	cout << root->data << " ";
-
-	print_line(root->left);
-
-	return;
-}
-
-void print(BinarySearchTree *root)
-{
-	if (!root) return; 
-	
-	tabs++; 
-	print(root->right);
- 
-	for (int i = 0; i < tabs; i++) cout << "- "; 
-	cout << root->data << endl;
-
-	print(root->left);
- 	tabs--;
-
-	return;
-}
-
-void Deletion(BinarySearchTree *root)
-{
-	if (!root) return;
-	
-	cout << endl << endl << "Type the node you want to delete: "; 
-	cin >> number;
-
-	if (number == root->data) 
-		{ 
-			cout << endl << "[-] Error: You are trying to remove the root of the tree!" << endl;
+		if (!root_up)
+		{
+			root_up = new BinarySearchTree;
+			root_up->value = value;
+			root_up->key = key;
+			root_up->parent = NULL;
+			root_up->left = 0;
+			root_up->right = 0;
 			return;
 		}
-
-	removeNode(root, number, parent);
-	
-}
-
-BinarySearchTree* findMaxNode(BinarySearchTree *root) 
-{
-    if (root == NULL) exit(4);
-    if (root->right) return findMaxNode(root->right);
-    return root;
-}
-
-void removeNode(BinarySearchTree *root, int number, BinarySearchTree *parent) {
-    if (root == NULL) {
-        return;
-    }
- 
-    if (root->data > number) removeNode(root->left, number, root);
-    else if (root->data < number) removeNode(root->right, number, root);
-    else 
-    {
-        if (root->left && root->right) 
-        {
-        	BinarySearchTree* localMax = findMaxNode(root->left);
-        	root->data = localMax->data;
-            removeNode(root->left, localMax->data, root);
-            return;
-        } 
-        else if (root->left) 
-        {
-            BinarySearchTree* localMax = findMaxNode(root->left);
-            root->data = localMax->data;
-            removeNode(root->left, localMax->data, root);
-        } 
-        else if (root->right) 
-        {
-            if (root->left == parent) parent->left = root->right;
-            else parent->right = root->right;
-            delete root;
-            root = NULL;
-        } 
-        else 
-        {
-            if (parent->left == root) parent->left = NULL;
-            else parent->right = NULL;
-            delete root;
-            root = NULL;
-        }
-    }
-}
- 
-void FreeTree(BinarySearchTree *&root)
-{
-	if (root != NULL)
-	{
-		FreeTree(root->left);
-		FreeTree(root->right);
-		delete root;
-		root = NULL;
+		else if (key > root_up->key)
+		{
+			insert(key, value, root_up->right); 
+			root_up->right->parent = root_up;
+		}
+		else if (key < root_up->key) 
+		{
+			insert(key, value, root_up->left); 
+			root_up->left->parent = root_up;
+		}
+		else return;
 	}
-	
-	return;
-}
- 
+
+	void find(Type value, BinarySearchTree *root)
+	{
+		if (!root)	return;
+		if (root->value == value)
+			cout << endl << "[+] The number " << value << " was found!" << endl;
+		find(value, root->left);
+		find(value, root->right);
+	}
+	void print(BinarySearchTree *root)
+	{
+		if (!root) return;
+		tabs++;
+		print(root->right);
+
+		for (int i = 0; i < tabs; i++) cout << "- ";
+		cout << root->value << endl;
+
+		print(root->left);
+		tabs--;
+		return;
+	}
+	void printstream(BinarySearchTree *root)
+	{
+
+		if (!root) return;
+		printstream(root->right);
+		cout << root->value << " " << endl;
+		printstream(root->left);
+		return;
+	}
+	void remove(Type value, BinarySearchTree *root)
+	{
+		if (root == NULL) return;
+
+		if (value > root->value) remove(value, root->right);
+		else if (value < root->value) remove(value, root->left);
+		else
+		{
+			if (!root->left && !root->right) // нет ни левого, ни правого
+			{
+				(root->parent->left == root) ? root->parent->left = NULL : root->parent->right = NULL;
+				delete root;
+				return;
+			}
+			else if (root->left && root->right) // есть и левый и правый
+			{
+				root->parent->left == root ? root->parent->left = root->left : root->parent->right = root->left;
+				root->left->parent = root->parent;
+				root->right->parent = NULL;
+				insert(root->right->key, root->right->value, root->parent);
+			}
+			else if ((root->left && !root->right) || (!root->left && root->right))
+			{
+				BinarySearchTree *tmp;
+				root->left ? tmp = root->left : tmp = root->right;
+				root->parent->left == root ? root->parent->left = tmp : root->parent->right = tmp;
+				delete root;
+				return;
+			}
+		}
+	}
+	~BinarySearchTree(){};
 };
 
-int main(void)
+int main()
 {
-	BinarySearchTree<unsigned int> *root = 0;
-	BinarySearchTree<unsigned int> *ptr;
+	int choice;
+	unsigned int key, value;
 
-	unsigned int* node;
-	unsigned int size = 0;
-	auto temp = 0;
-
-	cout << "Print the number of nodes: ";
-	cin >> temp;
-	try
+	BinarySearchTree <unsigned int> *root = 0;
+	BinarySearchTree <unsigned int> *p;
+	p = new BinarySearchTree <unsigned int>;
+	while (1)
 	{
-		if(temp < 0) throw 1;
-	}
-	catch(int test)
-	{
-		cout << endl << "[-] Exception " << test << ": The number of nodes can't be negative!!!" << endl;
-		return 0;
-	}
-	size = temp;
-
-	node = new unsigned int [size];
-
-	for (unsigned int i = 0; i < size; ++i)
-	{
-		cout << "Add node " << i+1 << ": ";
-		cin >> temp;
-		try
+		system("cls");
+		cout << "  Binary Search Tree Operations  " << endl;
+		cout << "  -----------------------------  " << endl;
+		cout << "  1. Insert  ";
+		cout << "  2. Print   ";
+		cout << "  3. Delete  ";
+		cout << "  4. Find    ";
+		cout << "  5. Print stream  ";
+		cout << "  0. Exit    " << endl;
+		cout << "  Enter your choice :  ";
+		cin >> choice;
+		switch (choice)
 		{
-			if( temp < 0 ) throw 2;
-		}
-		catch( int test )
-		{
-			cout << endl << "[-] Exception " << test << ": The node of tree can't be negative!!!" << endl;
+		case 1: cout << "  Enter data to be inserted :  ";
+			cin >> value;
+			key = value; // key = f(value) ключ поиска
+			p->insert(key, value, root);
+			break;
+		case 2: cout << endl;
+			cout << "  Here is the tree  " << endl;
+			cout << "  ------------------- " << endl;
+			p->print(root);
+			system("pause");
+			break;
+		case 3: cout << "  Enter data to be deleted :  ";
+			cin >> value;
+			p->remove(value, root);
+			break;
+		case 4: cout << "  Enter data to be searched :  ";
+			cin >> value;
+			p->find(value, root);
+			system("pause");
+			break;
+		case 5: cout << endl;
+			cout << "  Here is the stream  " << endl;
+			cout << "  ------------------- " << endl;
+			p->printstream(root);
+			system("pause");
+			break;
+		case 0:
 			return 0;
+			break;
 		}
-		node[i] = temp;
-		cout << endl;
 	}
-
-
-	for (unsigned int i = 0; i < size; ++i)
-	{
-		ptr->Add(node[i], root);
-	}
-
-	cout << endl << size << " ";
-	ptr->print_line(root);
-	cout << endl << endl << "Binary Search Tree:" << endl;
- 
-	ptr->print(root);
-	ptr->Search(root);
-	if( n == 0 ) cout << endl << "[-] The number " << number << " was not found!:(";
-
-	ptr->Deletion(root);
-	cout << endl << "The result of deletion: " << endl;
-	ptr->print(root);
-
-	ptr->FreeTree(root);
- 	delete [] node;
-	cout << endl << endl << "Press any button to exit the program " << endl;
-	_getch();
-	return 0;
 }
-
